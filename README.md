@@ -23,6 +23,17 @@ A local-first AI interview simulator and English communication improvement platf
 - ✅ Comprehensive API tests for all endpoints
 - ✅ Data seeding command
 
+### Phase 3 Complete ✅
+- ✅ Ollama LLM client with connection management
+- ✅ Interview orchestrator for question generation
+- ✅ Dynamic question generation using LLM
+- ✅ Fallback to question bank when LLM unavailable
+- ✅ Follow-up question generation based on answers
+- ✅ Interview evaluation with LLM scoring
+- ✅ Automatic evaluation on interview completion
+- ✅ Error handling and timeout management
+- ✅ Ollama status check command
+
 ## Requirements
 
 - Python 3.11 or 3.12
@@ -137,8 +148,11 @@ The API will be available at `http://localhost:8000/`
 - `POST /api/v1/interviews/{id}/start/` - Start interview
 - `POST /api/v1/interviews/{id}/pause/` - Pause interview
 - `POST /api/v1/interviews/{id}/resume/` - Resume interview
-- `POST /api/v1/interviews/{id}/finish/` - Finish interview
+- `POST /api/v1/interviews/{id}/finish/` - Finish interview (with optional evaluation)
 - `POST /api/v1/interviews/{id}/turns/` - Add turn to interview
+- `POST /api/v1/interviews/{id}/next_question/` - Generate next question (LLM or bank)
+- `POST /api/v1/interviews/{id}/answer_and_continue/` - Submit answer and get next question
+- `GET /api/v1/interviews/{id}/report/` - Get interview evaluation report
 
 ### Example: Create Interview
 
@@ -152,17 +166,59 @@ POST /api/v1/interviews/
 }
 ```
 
-### Example: Start Interview and Add Turn
+### Example: LLM Question Generation
 
 ```json
-POST /api/v1/interviews/1/start/
+POST /api/v1/interviews/1/next_question/
+{
+    "use_llm": true
+}
+
+Response:
+{
+    "question": "Can you explain the difference between a list and a tuple in Python?",
+    "turn_number": 2
+}
 ```
 
+### Example: Answer and Get Next Question
+
 ```json
-POST /api/v1/interviews/1/turns/
+POST /api/v1/interviews/1/answer_and_continue/
 {
     "question_text": "What is a Python decorator?",
-    "answer_text": "A function that wraps another function to modify its behavior"
+    "answer_text": "A decorator is a function that wraps another function to modify its behavior"
+}
+
+Response:
+{
+    "turn_number": 1,
+    "next_question": "Can you provide an example of using a decorator?",
+    "can_continue": true
+}
+```
+
+### Example: Finish with Evaluation
+
+```json
+POST /api/v1/interviews/1/finish/
+{
+    "generate_evaluation": true
+}
+
+Response:
+{
+    "id": 1,
+    "status": "finished",
+    "evaluation": {
+        "technical_score": 8.5,
+        "completeness_score": 7.5,
+        "reasoning_score": 8.0,
+        "organization_score": 7.0,
+        "overall_feedback": "Strong technical understanding...",
+        "strengths": "- Clear explanations\n- Good examples",
+        "improvements": "- Could expand on edge cases"
+    }
 }
 ```
 
@@ -195,7 +251,7 @@ backend/
 
 - ✅ **Phase 1**: Project setup, authentication, database models (COMPLETE)
 - ✅ **Phase 2**: Interview session management, questions, state transitions (COMPLETE)
-- ⏳ **Phase 3**: Local LLM integration (Ollama)
+- ✅ **Phase 3**: Local LLM integration (Ollama) (COMPLETE)
 - ⏳ **Phase 4**: Speech-to-text and text-to-speech
 - ⏳ **Phase 5**: Communication issue logging
 - ⏳ **Phase 6**: English Improvement Lab
@@ -206,8 +262,21 @@ backend/
 
 ### Ollama (Phase 3)
 Download and install from: https://ollama.ai/
+
 ```bash
+# Windows: Download installer from website
+
+# Start Ollama service
+ollama serve
+
+# Pull a model (recommended for CPU)
 ollama pull llama3.2:3b
+
+# Or use a smaller model
+ollama pull llama3.2:1b
+
+# Verify
+python manage.py check_ollama
 ```
 
 ### FFmpeg (Phase 4)
@@ -244,7 +313,16 @@ pytest --cov
 
 Manual API testing:
 ```bash
+# Phase 2
 python test_phase2_api.py
+
+# Phase 3 (requires Ollama running)
+python test_phase3_api.py
+```
+
+Check Ollama status:
+```bash
+python manage.py check_ollama
 ```
 
 ## Security Notes

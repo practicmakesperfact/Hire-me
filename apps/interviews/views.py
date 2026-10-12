@@ -9,6 +9,8 @@ from .serializers import (
     RoleSerializer, TopicSerializer, InterviewSessionSerializer,
     InterviewSessionDetailSerializer, InterviewTurnSerializer
 )
+from services.interview_orchestrator import InterviewOrchestrator
+from services.evaluation.interview_evaluator import InterviewEvaluator
 
 
 class RoleViewSet(viewsets.ModelViewSet):
@@ -30,6 +32,11 @@ class InterviewSessionViewSet(viewsets.ModelViewSet):
     """ViewSet for interview sessions."""
     serializer_class = InterviewSessionSerializer
     permission_classes = [IsAuthenticated]
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.orchestrator = InterviewOrchestrator()
+        self.evaluator = InterviewEvaluator()
     
     def get_queryset(self):
         return InterviewSession.objects.filter(user=self.request.user)
@@ -96,7 +103,7 @@ class InterviewSessionViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def finish(self, request, pk=None):
-        """Finish an interview session."""
+        """Finish an interview session and optionally generate evaluation."""
         session = self.get_object()
         
         if session.status in ['finished', 'cancelled']:
@@ -105,12 +112,23 @@ class InterviewSessionViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        generate_eval = request.data.get('generate_evaluation', True)
+        
         session.status = 'finished'
         session.finished_at = timezone.now()
         session.save()
         
+        evaluation_data = None
+        if generate_eval:
+            evaluation_data = self.orchestrator.finish_interview_and_evaluate(session)
+        
         serializer = self.get_serializer(session)
-        return Response(serializer.data)
+        response_data = serializer.data
+        
+        if evaluation_data:
+            response_data['evaluation'] = evaluation_data
+        
+        return Response(response_data)
     
     @action(detail=True, methods=['post'])
     def turns(self, request, pk=None):
@@ -134,3 +152,84 @@ class InterviewSessionViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=True, methods=['post'])
+    def next_question(self, request, pk=None):
+        """Generate next interview question using LLM."""
+        session = self.get_object()
+        
+        if session.status not in ['asking', 'processing']:
+            return Response(
+                {'error': f'Cannot generate question in {session.status} state'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        use_llm = request.data.get('use_llm', True)
+        question = self.orchestrator.generate_next_question(session, use_llm)
+        
+        if not question:
+            return Response(
+                {'error': 'Failed to generate question'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+        return Response({
+            'question': question,
+            'turn_number': session.turns.count() + 1
+        })
+    
+    @action(detail=True, methods=['post'])
+    def answer_and_continue(self, request, pk=None):
+        """Submit answer and get next question in one call."""
+        session = self.get_object()
+        
+        if session.status not in ['asking', 'listening', 'processing']:
+            return Response(
+                {'error': f'Cannot answer in {session.status} state'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        answer_text = request.data.get('answer_text')
+        current_question = request.data.get('question_text')
+        
+        if not answer_text or not current_question:
+            return Response(
+                {'error': 'answer_text and question_text are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        result = self.orchestrator.process_answer_and_generate_next(
+            session, answer_text, current_question
+        )
+        
+        return Response(result)
+    
+    @action(detail=True, methods=['get'])
+    def report(self, request, pk=None):
+        """Get interview evaluation report."""
+        session = self.get_object()
+        
+        if session.status != 'finished':
+            return Response(
+                {'error': 'Interview must be finished to generate report'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if evaluation exists
+        if hasattr(session, 'evaluation'):
+            from .serializers import InterviewEvaluationSerializer
+            serializer = InterviewEvaluationSerializer(session.evaluation)
+            return Response(serializer.data)
+        
+        # Generate evaluation if not exists
+        evaluation = self.evaluator.evaluate_interview(session)
+        
+        if evaluation:
+            from .serializers import InterviewEvaluationSerializer
+            serializer = InterviewEvaluationSerializer(evaluation)
+            return Response(serializer.data)
+        
+        return Response(
+            {'error': 'Failed to generate evaluation'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
