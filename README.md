@@ -34,6 +34,17 @@ A local-first AI interview simulator and English communication improvement platf
 - ✅ Error handling and timeout management
 - ✅ Ollama status check command
 
+### Phase 4 Complete ✅
+- ✅ faster-whisper integration for speech-to-text
+- ✅ Piper TTS integration for text-to-speech
+- ✅ Audio file validation (format, size, duration)
+- ✅ Audio format conversion with FFmpeg
+- ✅ Transcription with confidence scores and timestamps
+- ✅ Text-to-speech caching for efficiency
+- ✅ Speech API endpoints (transcribe, synthesize, analyze)
+- ✅ Comprehensive error handling
+- ✅ Speech services status check command
+
 ## Requirements
 
 - Python 3.11 or 3.12
@@ -154,6 +165,11 @@ The API will be available at `http://localhost:8000/`
 - `POST /api/v1/interviews/{id}/answer_and_continue/` - Submit answer and get next question
 - `GET /api/v1/interviews/{id}/report/` - Get interview evaluation report
 
+### Speech
+- `POST /api/v1/speech/transcribe/` - Transcribe audio to text
+- `POST /api/v1/speech/synthesize/` - Convert text to speech
+- `POST /api/v1/speech/analyze/` - Analyze audio metrics
+
 ### Example: Create Interview
 
 ```json
@@ -198,7 +214,38 @@ Response:
 }
 ```
 
-### Example: Finish with Evaluation
+### Example: Text-to-Speech
+
+```json
+POST /api/v1/speech/synthesize/
+{
+    "text": "Hello, this is a test of the text to speech system."
+}
+
+Response:
+{
+    "audio_url": "/media/audio/tts/abc123.wav",
+    "text": "Hello, this is a test..."
+}
+```
+
+### Example: Speech-to-Text
+
+```bash
+curl -X POST http://localhost:8000/api/v1/speech/transcribe/ \
+  -H "Authorization: Session" \
+  -F "audio=@interview_answer.wav" \
+  -F "language=en"
+
+Response:
+{
+    "text": "Python is a high-level programming language...",
+    "language": "en",
+    "confidence": 0.95,
+    "duration": 15.3,
+    "segments": [...]
+}
+```
 
 ```json
 POST /api/v1/interviews/1/finish/
@@ -252,7 +299,7 @@ backend/
 - ✅ **Phase 1**: Project setup, authentication, database models (COMPLETE)
 - ✅ **Phase 2**: Interview session management, questions, state transitions (COMPLETE)
 - ✅ **Phase 3**: Local LLM integration (Ollama) (COMPLETE)
-- ⏳ **Phase 4**: Speech-to-text and text-to-speech
+- ✅ **Phase 4**: Speech-to-text and text-to-speech (COMPLETE)
 - ⏳ **Phase 5**: Communication issue logging
 - ⏳ **Phase 6**: English Improvement Lab
 - ⏳ **Phase 7**: RAG knowledge base
@@ -281,13 +328,33 @@ python manage.py check_ollama
 
 ### FFmpeg (Phase 4)
 Download from: https://ffmpeg.org/download.html
-Add to PATH.
+
+```bash
+# Windows: Download zip, extract, add to PATH
+
+# Verify
+ffmpeg -version
+```
 
 ### Faster Whisper (Phase 4)
-Will be installed via requirements.txt in Phase 4.
+Already in requirements.txt
+
+```bash
+pip install faster-whisper
+
+# Models auto-download on first use
+# Check: python manage.py check_speech
+```
 
 ### Piper TTS (Phase 4)
-Installation instructions will be provided in Phase 4.
+Already in requirements.txt
+
+```bash
+pip install piper-tts
+
+# Voices auto-download on first use
+# Check: python manage.py check_speech
+```
 
 ## Admin Interface
 
@@ -318,11 +385,18 @@ python test_phase2_api.py
 
 # Phase 3 (requires Ollama running)
 python test_phase3_api.py
+
+# Phase 4 (requires speech services)
+python test_phase4_api.py
 ```
 
-Check Ollama status:
+Check service status:
 ```bash
+# Check Ollama
 python manage.py check_ollama
+
+# Check Speech services
+python manage.py check_speech
 ```
 
 ## Security Notes
