@@ -57,6 +57,18 @@ A local-first AI interview simulator and English communication improvement platf
 - ✅ Issue confirmation/dismissal workflow
 - ✅ Communication summary and statistics
 
+### Phase 6 Complete ✅
+- ✅ Practice queue with prioritized issues
+- ✅ Text-based practice submissions
+- ✅ Audio-based practice with automatic transcription
+- ✅ Reference audio generation for target pronunciation
+- ✅ Automatic practice attempt evaluation and scoring
+- ✅ Auto-mastery after 3 successful attempts (score ≥8.0)
+- ✅ Manual mastery marking
+- ✅ Practice history tracking
+- ✅ Comprehensive progress statistics
+- ✅ Category-based filtering
+
 ## Requirements
 
 - Python 3.11 or 3.12
@@ -192,6 +204,14 @@ The API will be available at `http://localhost:8000/`
 - `POST /api/v1/communication/analyze/{session_id}/` - Analyze session for issues
 - `GET /api/v1/communication/summary/` - Get user's issue summary
 
+### Practice Lab
+- `GET /api/v1/practice/queue/` - Get practice queue (filter by ?category=, ?limit=)
+- `POST /api/v1/practice/submit/` - Submit practice attempt (text or audio)
+- `GET /api/v1/practice/history/` - Get practice history (filter by ?issue_id=)
+- `GET /api/v1/practice/progress/` - Get overall progress statistics
+- `POST /api/v1/practice/issues/{id}/master/` - Mark issue as mastered
+- `POST /api/v1/practice/issues/{id}/reference-audio/` - Generate reference audio
+
 ### Example: Create Interview
 
 ```json
@@ -323,7 +343,7 @@ backend/
 - ✅ **Phase 3**: Local LLM integration (Ollama) (COMPLETE)
 - ✅ **Phase 4**: Speech-to-text and text-to-speech (COMPLETE)
 - ✅ **Phase 5**: Communication issue logging (COMPLETE)
-- ⏳ **Phase 6**: English Improvement Lab
+- ✅ **Phase 6**: English Improvement Lab (COMPLETE)
 - ⏳ **Phase 7**: RAG knowledge base
 - ⏳ **Phase 8**: Reports and documentation
 
@@ -413,6 +433,9 @@ python test_phase4_api.py
 
 # Phase 5 (communication issues)
 python test_phase5_api.py
+
+# Phase 6 (practice lab)
+python test_phase6_api.py
 ```
 
 Check service status:
