@@ -5,6 +5,7 @@ from apps.interviews.models import InterviewSession, InterviewTurn
 from apps.questions.models import Question
 from services.llm.ollama_client import get_ollama_client
 from services.evaluation.interview_evaluator import InterviewEvaluator
+from services.communication_analyzer.issue_detector import IssueDetector
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ class InterviewOrchestrator:
     def __init__(self):
         self.ollama = get_ollama_client()
         self.evaluator = InterviewEvaluator()
+        self.issue_detector = IssueDetector()
     
     def generate_next_question(
         self,
@@ -146,7 +148,8 @@ Respond with ONLY the question text."""
         self,
         session: InterviewSession,
         answer_text: str,
-        current_question: str
+        current_question: str,
+        analyze_communication: bool = True
     ) -> Dict[str, Any]:
         """Process answer and generate next question."""
         
@@ -159,13 +162,23 @@ Respond with ONLY the question text."""
             answer_text=answer_text
         )
         
+        # Silently detect communication issues (doesn't interrupt)
+        issues_detected = 0
+        if analyze_communication:
+            issues = self.issue_detector.analyze_turn_silent(turn)
+            for issue in issues:
+                issue.save()
+            issues_detected = len(issues)
+            logger.info(f"Detected {issues_detected} communication issues (saved silently)")
+        
         # Generate next question
         next_question = self.generate_next_question(session)
         
         return {
             'turn_number': turn_number,
             'next_question': next_question,
-            'can_continue': next_question is not None
+            'can_continue': next_question is not None,
+            'issues_detected': issues_detected  # For logging only, not shown to user
         }
     
     def finish_interview_and_evaluate(

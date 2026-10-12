@@ -45,6 +45,18 @@ A local-first AI interview simulator and English communication improvement platf
 - ✅ Comprehensive error handling
 - ✅ Speech services status check command
 
+### Phase 5 Complete ✅
+- ✅ Silent communication issue detection during interviews
+- ✅ Filler word detection (um, uh, like, you know)
+- ✅ Repeated word detection (consecutive and frequent)
+- ✅ Grammar issue detection with LLM
+- ✅ Speaking rate analysis (words per minute)
+- ✅ Pronunciation uncertainty flagging from transcription
+- ✅ Issue categorization and confidence scoring
+- ✅ Post-interview issue review (never interrupts interview)
+- ✅ Issue confirmation/dismissal workflow
+- ✅ Communication summary and statistics
+
 ## Requirements
 
 - Python 3.11 or 3.12
@@ -169,6 +181,16 @@ The API will be available at `http://localhost:8000/`
 - `POST /api/v1/speech/transcribe/` - Transcribe audio to text
 - `POST /api/v1/speech/synthesize/` - Convert text to speech
 - `POST /api/v1/speech/analyze/` - Analyze audio metrics
+
+### Communication Issues
+- `GET /api/v1/communication/issues/` - List issues (filter by ?status=, ?category=)
+- `POST /api/v1/communication/issues/` - Create issue manually
+- `GET /api/v1/communication/issues/{id}/` - Get issue details
+- `POST /api/v1/communication/issues/{id}/confirm/` - Confirm issue as valid
+- `POST /api/v1/communication/issues/{id}/dismiss/` - Dismiss as false positive
+- `POST /api/v1/communication/issues/{id}/start_practicing/` - Mark as practicing
+- `POST /api/v1/communication/analyze/{session_id}/` - Analyze session for issues
+- `GET /api/v1/communication/summary/` - Get user's issue summary
 
 ### Example: Create Interview
 
@@ -300,7 +322,7 @@ backend/
 - ✅ **Phase 2**: Interview session management, questions, state transitions (COMPLETE)
 - ✅ **Phase 3**: Local LLM integration (Ollama) (COMPLETE)
 - ✅ **Phase 4**: Speech-to-text and text-to-speech (COMPLETE)
-- ⏳ **Phase 5**: Communication issue logging
+- ✅ **Phase 5**: Communication issue logging (COMPLETE)
 - ⏳ **Phase 6**: English Improvement Lab
 - ⏳ **Phase 7**: RAG knowledge base
 - ⏳ **Phase 8**: Reports and documentation
@@ -388,6 +410,9 @@ python test_phase3_api.py
 
 # Phase 4 (requires speech services)
 python test_phase4_api.py
+
+# Phase 5 (communication issues)
+python test_phase5_api.py
 ```
 
 Check service status:
@@ -397,6 +422,9 @@ python manage.py check_ollama
 
 # Check Speech services
 python manage.py check_speech
+
+# Analyze interviews for issues
+python manage.py analyze_interviews --all
 ```
 
 ## Security Notes
