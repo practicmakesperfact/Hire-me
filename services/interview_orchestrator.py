@@ -6,6 +6,7 @@ from apps.questions.models import Question
 from services.llm.ollama_client import get_ollama_client
 from services.evaluation.interview_evaluator import InterviewEvaluator
 from services.communication_analyzer.issue_detector import IssueDetector
+from services.rag.retriever import KnowledgeRetriever
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ class InterviewOrchestrator:
         self.ollama = get_ollama_client()
         self.evaluator = InterviewEvaluator()
         self.issue_detector = IssueDetector()
+        self.retriever = KnowledgeRetriever()
     
     def generate_next_question(
         self,
@@ -39,13 +41,23 @@ class InterviewOrchestrator:
         previous_turns = session.turns.all().order_by('turn_number')
         context = self._build_conversation_context(previous_turns)
         
+        # Get knowledge context from RAG
+        topic_name = session.topic.name if session.topic else 'General'
+        knowledge_context = self.retriever.get_context_for_question(
+            topic=topic_name,
+            difficulty=session.difficulty,
+            limit=2
+        )
+        
         prompt = f"""You are conducting a technical interview.
 
 Interview Details:
 - Role: {session.role.name if session.role else 'General'}
-- Topic: {session.topic.name if session.topic else 'General'}
+- Topic: {topic_name}
 - Difficulty: {session.difficulty}
 - Type: {session.interview_type}
+
+{knowledge_context}
 
 {context}
 
@@ -53,12 +65,14 @@ Generate the next interview question. The question should:
 1. Be relevant to the topic and role
 2. Match the difficulty level
 3. Build upon previous answers if applicable
-4. Be clear and specific
+4. Be grounded in the documentation provided above
+5. Be clear and specific
 
 Respond with ONLY the question text, no additional formatting."""
         
         system_prompt = f"""You are an experienced {session.interview_type} interviewer.
 Ask clear, relevant questions appropriate for a {session.difficulty} level candidate.
+Base questions on official documentation when available.
 Never interrupt or correct the candidate during the interview."""
         
         question = self.ollama.generate(

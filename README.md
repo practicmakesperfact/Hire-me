@@ -69,6 +69,17 @@ A local-first AI interview simulator and English communication improvement platf
 - ✅ Comprehensive progress statistics
 - ✅ Category-based filtering
 
+### Phase 7 Complete ✅
+- ✅ Document import and processing (text, markdown)
+- ✅ Text chunking with configurable size and overlap
+- ✅ SQLite FTS5-based keyword search
+- ✅ Knowledge source management with verification status
+- ✅ Answer verification against documentation
+- ✅ RAG integration with interview question generation
+- ✅ Source attribution and licensing tracking
+- ✅ Document statistics and management
+- ✅ Admin-only document import control
+
 ## Requirements
 
 - Python 3.11 or 3.12
@@ -212,6 +223,16 @@ The API will be available at `http://localhost:8000/`
 - `POST /api/v1/practice/issues/{id}/master/` - Mark issue as mastered
 - `POST /api/v1/practice/issues/{id}/reference-audio/` - Generate reference audio
 
+### Knowledge Base
+- `GET /api/v1/knowledge/sources/` - List knowledge sources
+- `POST /api/v1/knowledge/import/` - Import document (admin only)
+- `GET /api/v1/knowledge/sources/{id}/` - Get source details
+- `GET /api/v1/knowledge/sources/{id}/chunks/` - Get source chunks
+- `GET /api/v1/knowledge/sources/{id}/stats/` - Get source statistics
+- `POST /api/v1/knowledge/search/` - Search knowledge base
+- `POST /api/v1/knowledge/verify/` - Verify answer against sources
+- `GET /api/v1/knowledge/list/` - List all verified sources
+
 ### Example: Create Interview
 
 ```json
@@ -344,7 +365,7 @@ backend/
 - ✅ **Phase 4**: Speech-to-text and text-to-speech (COMPLETE)
 - ✅ **Phase 5**: Communication issue logging (COMPLETE)
 - ✅ **Phase 6**: English Improvement Lab (COMPLETE)
-- ⏳ **Phase 7**: RAG knowledge base
+- ✅ **Phase 7**: RAG knowledge base (COMPLETE)
 - ⏳ **Phase 8**: Reports and documentation
 
 ## Additional Dependencies (Future Phases)
@@ -436,9 +457,12 @@ python test_phase5_api.py
 
 # Phase 6 (practice lab)
 python test_phase6_api.py
+
+# Phase 7 (RAG knowledge base)
+python test_phase7_api.py
 ```
 
-Check service status:
+Management commands:
 ```bash
 # Check Ollama
 python manage.py check_ollama
@@ -448,6 +472,9 @@ python manage.py check_speech
 
 # Analyze interviews for issues
 python manage.py analyze_interviews --all
+
+# Import documentation
+python manage.py import_docs --file path/to/doc.txt --title "Python Docs" --url "https://docs.python.org"
 ```
 
 ## Security Notes
