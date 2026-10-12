@@ -80,6 +80,18 @@ A local-first AI interview simulator and English communication improvement platf
 - ✅ Document statistics and management
 - ✅ Admin-only document import control
 
+### Phase 8 Complete ✅
+- ✅ Overview report with interview/performance/communication stats
+- ✅ Communication improvement report with issue breakdown
+- ✅ Interview performance report with score progression
+- ✅ Progress snapshot creation for tracking over time
+- ✅ Improvement trend analysis (improving/stable/declining)
+- ✅ Practice timeline visualization
+- ✅ Personalized recommendations based on activity
+- ✅ Performance breakdown by topic and difficulty
+- ✅ Common pattern analysis
+- ✅ User-specific insights generation
+
 ## Requirements
 
 - Python 3.11 or 3.12
@@ -233,6 +245,12 @@ The API will be available at `http://localhost:8000/`
 - `POST /api/v1/knowledge/verify/` - Verify answer against sources
 - `GET /api/v1/knowledge/list/` - List all verified sources
 
+### Reports
+- `GET /api/v1/reports/overview/` - Get comprehensive overview report
+- `GET /api/v1/reports/communication/` - Get communication improvement report
+- `GET /api/v1/reports/interviews/` - Get interview performance report
+- `POST /api/v1/reports/snapshot/` - Create progress snapshot
+
 ### Example: Create Interview
 
 ```json
@@ -332,6 +350,54 @@ Response:
 }
 ```
 
+### Example: Overview Report
+
+```json
+GET /api/v1/reports/overview/
+
+Response:
+{
+    "user": {"username": "testuser", "email": "test@example.com"},
+    "interviews": {
+        "total": 15,
+        "finished": 12,
+        "recent_30d": 5,
+        "completion_rate": 80.0
+    },
+    "performance": {
+        "average_scores": {
+            "technical": 8.2,
+            "completeness": 7.5,
+            "reasoning": 7.8,
+            "organization": 7.3
+        },
+        "evaluations_count": 12
+    },
+    "communication": {
+        "total_issues": 25,
+        "mastered": 15,
+        "mastery_rate": 60.0
+    },
+    "practice": {"total_attempts": 48, "recent_30d": 12},
+    "improvement_trend": "improving"
+}
+```
+
+### Example: Create Progress Snapshot
+
+```json
+POST /api/v1/reports/snapshot/
+
+Response:
+{
+    "id": 5,
+    "date": "2024-01-15",
+    "total_issues": 25,
+    "mastered_issues": 15,
+    "message": "Snapshot created successfully"
+}
+```
+
 ## Project Structure
 
 ```
@@ -366,7 +432,7 @@ backend/
 - ✅ **Phase 5**: Communication issue logging (COMPLETE)
 - ✅ **Phase 6**: English Improvement Lab (COMPLETE)
 - ✅ **Phase 7**: RAG knowledge base (COMPLETE)
-- ⏳ **Phase 8**: Reports and documentation
+- ✅ **Phase 8**: Reports and documentation (COMPLETE)
 
 ## Additional Dependencies (Future Phases)
 
@@ -460,6 +526,9 @@ python test_phase6_api.py
 
 # Phase 7 (RAG knowledge base)
 python test_phase7_api.py
+
+# Phase 8 (reports)
+python test_phase8_api.py
 ```
 
 Management commands:
