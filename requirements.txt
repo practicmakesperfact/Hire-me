@@ -1,0 +1,15 @@
+Django>=4.2,<5.0
+djangorestframework>=3.14.0
+python-decouple>=3.8
+PyJWT>=2.8.0
+pydantic>=2.5.0
+
+# Speech Processing
+faster-whisper>=0.10.0
+piper-tts>=1.2.0
+
+# Testing
+pytest>=7.4.0
+pytest-django>=4.7.0
+pytest-cov>=4.1.0
+requests>=2.31.0
