@@ -1,526 +1,596 @@
-# HIRE ME — Backend Development Prompt
+# HIRE ME — Frontend Development Prompt
 
 ## 1. Project Overview
 
-Build a production-minded, modular backend for **Hire Me**, a local-first AI interview simulator and English communication improvement platform.
+Build a complete, responsive frontend for **Hire Me**, a local-first AI interview simulator and English communication improvement platform.
 
-The application has two core modes:
+The application has two main purposes:
 
-1. **Interview Simulator:** Conduct realistic technical and behavioral interviews using voice or text. The interviewer must never interrupt the user to correct pronunciation, grammar, vocabulary, or communication mistakes.
-2. **English Improvement Lab:** After an interview, allow users to review recorded learning insights, practise difficult words and sentences, improve pronunciation and fluency, and track progress over time.
+1. **Interview Simulator:** Practise technical and behavioral interviews using voice or text, with a realistic AI interviewer that does not interrupt to correct English.
+2. **English Improvement Lab:** Review pronunciation difficulties, grammar mistakes, vocabulary improvements, filler words, speaking patterns, and previous practice attempts after interviews.
 
-The system must run locally on Windows 10 with an Intel i5 10th-generation CPU, 16 GB RAM, and no dedicated GPU.
+The frontend must be professional enough for a software engineering portfolio and comfortable for daily personal use.
 
-## 2. Mandatory Constraints
+## 2. Mandatory Technology Stack
 
-- No paid AI APIs or mandatory cloud services.
-- No OpenAI, Anthropic, Gemini, or other paid hosted LLM API dependencies.
-- Use locally running AI models.
-- Store application data in SQLite initially.
-- Store uploaded or recorded audio locally and minimize audio retention.
-- Keep secrets and personal data out of Git.
-- Support offline operation after all required models and dependencies are downloaded.
-- Do not implement frontend functionality in this task.
-- Do not duplicate backend features that already exist. Inspect the repository before making changes.
-- Use Python 3.11 or 3.12 if compatible with the existing project and speech-processing dependencies.
-- Prioritize reliability, clear architecture, low resource usage, and maintainable code.
+Use:
 
-## 3. Technology Stack
+- Next.js with the App Router.
+- TypeScript with strict type checking.
+- Tailwind CSS.
+- shadcn/ui for accessible interface components.
+- Lucide icons.
+- React Hook Form and Zod for form validation where useful.
+- Recharts for progress charts.
+- Browser MediaRecorder API for recording microphone audio.
+- Fetch API or a small typed API client for Django REST integration.
 
-- Python
-- Django
-- Django REST Framework
-- SQLite
-- Django ORM and Django migrations
-- Ollama for local LLM inference
-- faster-whisper for speech-to-text
-- A local text-to-speech engine, such as Piper or a maintained compatible alternative
-- FFmpeg for audio conversion when required
-- Local audio-analysis libraries for speech metrics
-- pytest and pytest-django for testing
-- Pydantic for structured validation where useful
+Use stable, mutually compatible dependency versions.
 
-Use a local embedding model and vector index only when necessary. Begin with SQLite FTS5 or another simple local retrieval mechanism if suitable.
+Do not build the backend in Next.js. Django REST Framework remains the source of truth for users, interviews, learning records, and progress.
 
-Do not install heavyweight dependencies without explaining why they are necessary.
+## 3. Repository Inspection and Integration
 
-## 4. Repository Inspection
+Before writing code:
 
-Before implementation:
+1. Inspect the existing frontend repository.
+2. Inspect the available backend API routes and serializers if the backend repository is accessible.
+3. Reuse existing components and working code.
+4. Create a clear implementation plan.
+5. Identify backend endpoints that are not implemented yet.
+6. Do not invent successful API responses or pretend missing endpoints exist.
 
-1. Inspect the current directory structure and existing files.
-2. Identify existing Django applications, dependencies, database models, API routes, and tests.
-3. Reuse existing working code where appropriate.
-4. Create a concise implementation plan.
-5. Identify missing features and potential dependency conflicts.
-6. Implement incrementally without unnecessarily rewriting the project.
+Use an environment variable such as:
 
-If the repository is empty, initialize the backend with a clean Django project structure.
+`NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000/api/v1`
 
-## 5. Suggested Architecture
+Keep API configuration centralized.
 
-Use a modular structure similar to:
+Implement typed API services, loading states, empty states, error handling, authentication handling, and reusable components.
 
-backend/
-  manage.py
-  config/
-    settings.py
-    urls.py
-    asgi.py
-  apps/
-    accounts/
-    interviews/
-    questions/
-    knowledge/
-    speech/
-    communication/
-    practice/
-    reports/
-  services/
-    llm/
-    rag/
-    speech_to_text/
-    text_to_speech/
-    audio_analysis/
-    evaluation/
-  tests/
-  requirements.txt
-  .env.example
-  .gitignore
-  README.md
+If an endpoint is unavailable, show a useful development message and keep the application usable wherever possible.
 
-Adapt this structure if a simpler organization better fits the existing repository. Avoid unnecessary abstractions and circular dependencies.
+## 4. Design Direction
 
-## 6. Authentication and User Management
+Create a modern, calm, polished SaaS-style interface.
 
-Implement Django authentication with:
+Design principles:
 
-- User registration and login.
+- Clean typography and generous spacing.
+- Neutral surfaces with one consistent accent color.
+- Excellent contrast and accessible controls.
+- Light and dark themes.
+- Responsive layouts for desktop, tablet, and mobile.
+- Consistent cards, forms, tables, dialogs, and navigation.
+- Subtle animations only when they improve usability.
+- Clear visual feedback for recording, processing, success, and errors.
+
+Avoid excessive gradients, unnecessary decoration, overcrowded dashboards, and distracting animations.
+
+Use a consistent design system with reusable spacing, typography, colors, radii, and component variants.
+
+## 5. Application Layout
+
+Create a responsive authenticated application shell.
+
+### Desktop sidebar
+
+Include:
+
+- Overview
+- Start Interview
+- Interview History
+- English Improvement Lab
+- Pronunciation Practice
+- Communication Progress
+- Knowledge Sources
+- Settings
+
+Show the application logo, active navigation state, user profile, and a collapse option.
+
+### Mobile navigation
+
+Use a responsive drawer or mobile navigation pattern. Ensure microphone controls, interview actions, and practice buttons remain easy to reach.
+
+### Global header
+
+Include:
+
+- Current page title.
+- Breadcrumbs when useful.
+- Theme toggle.
+- User profile menu.
+- Optional system status for local AI services.
+
+Display service availability only when the frontend has actually checked the backend health endpoint.
+
+## 6. Authentication Pages
+
+Implement:
+
+- Registration.
+- Login.
 - Logout.
-- Current-user profile endpoint.
-- Secure password hashing.
-- User-specific interview sessions and learning records.
-- Authorization checks for every private resource.
-- Optional local development authentication configuration.
+- Current-user profile.
+- Form validation.
+- Password visibility toggle.
+- Loading and error states.
+- Protected application routes.
 
-Never expose one user's interview records or audio to another user.
+Follow the authentication method implemented by Django.
 
-Use session authentication or JWT where appropriate. Do not store plaintext passwords or hardcode secrets.
+For session authentication, handle CSRF correctly. If JWT is used, follow the backend's configured token-storage and refresh strategy. Do not expose secrets or hardcode credentials.
 
-## 7. Interview Management
+## 7. Dashboard
 
-Create models and APIs for:
+Build a useful dashboard with:
 
-- Interview roles and job descriptions.
-- Interview topics and difficulty levels.
-- Technical and behavioral questions.
-- Interview sessions.
-- Interview turns.
-- Interview evaluations and reports.
+### Summary cards
 
-Support interview types such as:
+- Interviews completed.
+- Total practice sessions.
+- Learning issues awaiting review.
+- Words or sentences mastered.
 
-- Software engineering fundamentals.
-- Python and Django.
-- React and frontend development.
-- Databases and SQL.
-- Data structures and algorithms.
-- Machine learning and AI.
-- Behavioral and HR interviews.
-- Custom user-provided topics.
+### Progress visualizations
 
-Each interview session should support these states:
+- Communication progress over time.
+- Speaking rate over recent sessions.
+- Filler-word frequency over time.
+- Practice completion.
+- Interview performance trends.
 
-READY → ASKING → LISTENING → TRANSCRIBING → PROCESSING → ASKING → FINISHED
+### Recent activity
 
-Support pause, resume, cancellation, and recovery from recoverable errors.
+Show recent interviews, recently reviewed mistakes, and suggested practice items.
 
-Every interview turn should preserve the question, the user's original transcript, timestamps, and associated evaluation records.
+### Quick actions
 
-## 8. Interview Orchestrator
+- Start a technical interview.
+- Start a behavioral interview.
+- Continue English practice.
+- Review recent communication issues.
 
-Implement a dedicated interview orchestration service.
+Use real backend data. Clearly show loading, no-data, and failure states. Do not fabricate statistics.
 
-Responsibilities:
+## 8. Interview Setup Page
 
-1. Select or generate an interview question.
-2. Use approved knowledge sources when generating technical questions.
-3. Deliver the question as text and optionally local synthesized audio.
-4. Accept the user's spoken or typed answer.
-5. Transcribe audio locally when needed.
-6. Generate a follow-up question based on the answer.
-7. Save the conversation and relevant evidence.
-8. Produce a report when the session finishes.
+Let users configure:
 
-The interviewer must not interrupt an answer to correct English.
+- Interview type.
+- Target role.
+- Technical topic.
+- Difficulty.
+- Interview duration.
+- Number of questions, when supported.
+- Voice or text interaction.
+- Optional job description.
+- Optional custom interview instructions.
 
-During the interview, do not display or speak grammar corrections, pronunciation warnings, or vocabulary suggestions. Collect learning insights in the background or derive them after the turn has been stored.
+Provide a microphone and audio-system check before starting a voice interview.
 
-Interview performance evaluation must be separate from English-learning analysis.
+Display the selected configuration and a clear Start Interview action.
 
-## 9. Local LLM Integration
+Validate required fields and submit the configuration to Django.
 
-Implement an Ollama client service that connects to a locally configured Ollama instance.
-
-Requirements:
-
-- Configure the Ollama base URL and model name using environment variables.
-- Set configurable request timeouts.
-- Handle unavailable models, connection failures, invalid responses, and inference errors.
-- Validate structured outputs before saving them.
-- Use JSON or schema-constrained outputs when supported.
-- Support a fallback message when the model is unavailable.
-- Avoid repeatedly loading or switching heavyweight models.
-- Never send user data to a hosted LLM provider.
-
-Do not hardcode a specific model. Make it configurable so a small quantized instruction model can be used on CPU.
-
-## 10. Local RAG Knowledge Base
-
-Implement a retrieval-augmented generation service for interview questions and feedback.
-
-Start with approved, locally stored technical documentation, such as:
-
-- Official Python documentation.
-- Official Django documentation.
-- Official React documentation.
-- Official PostgreSQL documentation.
-- Official scikit-learn documentation.
-
-Add licensed interview question banks only when their reuse permissions are verified.
-
-Store source metadata including:
-
-- Source title.
-- Source URL.
-- License or usage permissions.
-- Version or publication date when available.
-- Import date.
-- Verification status.
-- Content hash.
-- Associated document chunks.
-
-Requirements:
-
-- Import and process supported documents safely.
-- Split content into manageable chunks.
-- Retrieve relevant passages for questions and evaluations.
-- Preserve source attribution.
-- Provide citations only when a retrieved source actually supports the claim.
-- Never invent citations or claim that a source verifies unsupported information.
-- Provide a basic search endpoint.
-- Keep document processing local.
-
-Begin with SQLite FTS5 if available and suitable. Add local embeddings and a vector index as a separate, optional enhancement.
-
-## 11. Voice and Speech Processing
-
-Implement separate services for speech-to-text, text-to-speech, and audio analysis.
-
-### Speech-to-text
-
-Use faster-whisper locally.
-
-Requirements:
-
-- Accept supported audio formats.
-- Validate file size, duration, and content type.
-- Convert unsupported formats using FFmpeg when available.
-- Return the recognized transcript and available timing information.
-- Record transcription confidence information when supported.
-- Flag uncertain segments for review.
-- Never assume a transcription error proves that the user pronounced a word incorrectly.
-
-### Text-to-speech
-
-Use a locally installed TTS engine.
-
-Requirements:
-
-- Convert interviewer questions into speech.
-- Allow configurable voice and speech rate when supported.
-- Cache reusable generated prompts where appropriate.
-- Save generated audio locally only when necessary.
-- Provide clear errors when a required voice model is unavailable.
-
-### Audio analysis
-
-Extract useful, explainable measurements where technically supported:
-
-- Speaking rate in words per minute.
-- Pause duration and frequency.
-- Silence ratio.
-- Filler-word frequency.
-- Repeated words and phrases.
-- Approximate volume consistency.
-- Basic pitch and vocal-variation measurements.
-
-Do not treat pitch, accent, or a particular speaking style as proof of professionalism or communication ability.
-
-Clearly distinguish objective measurements, estimates, and AI-generated interpretations.
-
-## 12. Silent Communication Learning Log
+## 9. Live Interview Interface
 
 This is a core feature.
 
-During an interview, record potential learning issues without interrupting the user.
+Design a focused interview workspace with:
 
-Create a CommunicationIssue model with fields such as:
+### Main interview area
 
-- User.
-- Interview session.
-- Interview turn.
-- Issue category.
-- Original text or word.
-- Proposed correction.
-- Explanation.
-- Supporting evidence.
-- Confidence score, where available.
-- Review status.
-- Practice count.
-- Mastery status.
-- Created timestamp.
+- Current interviewer question.
+- Interviewer audio playback.
+- Question number and session progress.
+- Text transcript of the conversation.
+- Microphone recording status.
+- Recording duration.
+- Audio-processing status.
+- Text-answer fallback.
+- Submit answer, pause, resume, and finish actions.
 
-Supported categories:
+### Voice interaction
 
-- Potential pronunciation issue.
-- Possible speech-recognition error.
-- Grammar issue.
-- Vocabulary improvement.
+Use the browser MediaRecorder API to capture microphone input.
+
+Requirements:
+
+- Request microphone permission only when needed.
+- Display clear recording and permission indicators.
+- Record audio in a format supported by the backend or convert it through an explicitly supported mechanism.
+- Upload audio to the configured Django endpoint.
+- Handle unsupported MIME types.
+- Handle microphone denial, missing devices, upload failures, and recording errors.
+- Prevent accidental duplicate submissions.
+- Stop microphone tracks when recording ends or the page is left.
+- Do not claim that an answer was submitted or processed until the backend confirms it.
+
+Play generated interviewer audio returned by Django.
+
+Provide keyboard-accessible controls and a text-answer fallback.
+
+### Non-interruption requirement
+
+The interview UI must not display pronunciation corrections, grammar suggestions, vocabulary replacements, or English-learning warnings while the interview is in progress.
+
+The user should be able to focus on answering naturally.
+
+Store and display interview questions and answers independently of the English Improvement Lab.
+
+## 10. Interview Results Page
+
+After an interview is finished, show a structured report containing:
+
+- Overall interview summary.
+- Technical accuracy.
+- Answer completeness.
+- Reasoning quality.
+- Answer organization.
+- Strong answers.
+- Areas for improvement.
+- Recommended technical topics to practise.
+- Communication-learning items discovered during the interview.
+
+Clearly separate interview performance from English communication metrics.
+
+Include actions to:
+
+- Review the transcript.
+- Revisit a question.
+- Start another interview.
+- Open flagged communication issues in the English Improvement Lab.
+
+Do not display unsupported scores. Explain the rubric when scores are available.
+
+## 11. English Improvement Lab
+
+This is the second core feature.
+
+Create a dedicated learning workspace where users review mistakes collected from past interviews.
+
+### Overview
+
+Display:
+
+- Issues needing review.
+- Confirmed learning issues.
+- Items currently being practised.
+- Mastered items.
+- Recent practice activity.
+
+### Issue categories
+
+Support filters for:
+
+- Pronunciation.
+- Possible transcription errors.
+- Grammar.
+- Vocabulary.
 - Filler words.
 - Repeated words.
-- Speaking-rate observation.
-- Pause or fluency observation.
+- Speaking rate.
+- Pauses and fluency.
 - Sentence clarity.
 - Answer organization.
 
-Use explicit statuses such as:
+### Issue list
 
-- NEEDS_REVIEW
-- CONFIRMED
-- DISMISSED
-- PRACTICING
-- MASTERED
+Each issue should display:
 
-Do not automatically classify every uncertain word as a user error.
+- Original word, phrase, or sentence.
+- Suggested correction.
+- Short explanation.
+- Interview date and context.
+- Confidence or uncertainty indicator when available.
+- Current review status.
+- Practice action.
 
-For suspected pronunciation issues, preserve the original audio segment when available and permitted. Store a reference pronunciation or phoneme-level assessment only when a suitable model supports it.
+Allow users to mark an issue as confirmed, dismiss an incorrect suggestion, or add it to their practice queue.
 
-For grammar and vocabulary issues, preserve the original sentence and the proposed alternative.
+### Issue detail page or drawer
 
-All corrections are private learning records. They must never change the original interview transcript or the interview conversation.
+Display the original evidence and proposed correction side by side.
 
-Allow users to dismiss false positives and mark corrections as useful or incorrect.
+For pronunciation issues, show a pronunciation guide, phonetic information when supplied by the backend, and available reference audio.
 
-## 13. English Improvement Lab
+For grammar issues, show the original sentence, corrected sentence, and concise explanation.
 
-Build backend functionality that allows users to practise mistakes from previous interviews.
+For suspected transcription errors, clearly indicate that the system may have misunderstood the speaker rather than assuming the speaker made a mistake.
 
-Required capabilities:
+## 12. Pronunciation Practice
 
-- List learning issues by category.
-- Filter by interview, date, status, and difficulty.
-- Retrieve the original word or sentence.
-- Show the proposed correction and explanation.
-- Play an available original audio segment.
-- Generate or retrieve local reference audio.
-- Record a new practice attempt.
-- Transcribe the attempt locally.
-- Compare the attempt with the target text.
-- Return useful pronunciation or fluency feedback when supported.
-- Track practice history.
-- Mark issues as mastered or needing further practice.
-- Recommend the next items to practise.
+Create an interactive practice interface.
 
-For grammar exercises, let the user compare the original sentence with a corrected version and then practise speaking the improved sentence.
+A typical practice flow:
 
-For pronunciation exercises, use a suitable phoneme-level model where feasible. Do not claim that faster-whisper alone provides reliable phoneme-level pronunciation scoring.
+1. Display the target word or sentence.
+2. Play the available reference pronunciation.
+3. Allow the user to listen again.
+4. Record the user's attempt.
+5. Upload the attempt to Django.
+6. Display the backend's assessment.
+7. Let the user repeat the exercise.
+8. Save the attempt and progress.
 
-Use a configurable, transparent assessment rubric. Explain uncertainty and avoid presenting estimates as objective truth.
+Show:
 
-## 14. Progress Tracking and Reports
+- Target word or sentence.
+- Reference audio controls.
+- Microphone and recording timer.
+- Attempt history.
+- Recognized transcript.
+- Assessment details.
+- Practice again button.
+- Mark as mastered action when appropriate.
 
-Create endpoints and services for:
+Only display phoneme-level scores when the backend provides an appropriate assessment. Do not invent pronunciation scores from transcription similarity alone.
 
-- Interview history.
-- Interview performance summaries.
-- Communication improvement history.
-- Common grammar patterns.
-- Frequently flagged words.
-- Filler-word trends.
-- Speaking-rate trends.
-- Practice completion.
-- Mastered versus outstanding issues.
-- Progress between practice sessions.
+Keep the experience encouraging, specific, and non-judgmental.
 
-Keep technical interview scores separate from communication-practice metrics.
+## 13. Sentence and Grammar Practice
 
-Use consistent scoring rubrics for technical accuracy, completeness, reasoning, and answer organization.
+Create exercises that help the user speak clearer, more professional English.
 
-For communication, assess clarity, structure, grammar, vocabulary, fluency, and pronunciation where the available evidence supports the assessment.
+Each exercise can contain:
 
-Do not calculate misleading scores when insufficient data exists.
+- Original sentence.
+- Suggested corrected sentence.
+- Explanation of the grammar or vocabulary issue.
+- Reference audio when available.
+- Record and replay controls.
+- Recognized attempt transcript.
+- Feedback from the backend.
+- Practice history.
 
-## 15. Suggested REST API
+Allow users to practise the corrected sentence and revisit previous mistakes.
 
-Use `/api/v1/` and Django REST Framework.
+Avoid overwhelming the user with too many corrections at once. Support practising one issue at a time.
 
-### Authentication
+## 14. Communication Progress Page
 
-- `POST /api/v1/auth/register/`
-- `POST /api/v1/auth/login/`
-- `POST /api/v1/auth/logout/`
-- `GET /api/v1/auth/me/`
+Build a progress dashboard that helps users understand improvement over time.
 
-### Interview configuration
+Include:
 
-- `GET /api/v1/roles/`
-- `POST /api/v1/roles/`
-- `GET /api/v1/topics/`
-- `GET /api/v1/questions/`
+- Speaking-rate history.
+- Filler-word frequency.
+- Pause and fluency trends.
+- Pronunciation practice completion.
+- Grammar issues resolved.
+- Mastered words and sentences.
+- Frequently recurring issues.
+- Practice streaks, if supported by actual history.
+- Recent achievements based on real records.
 
-### Interview sessions
+Use Recharts with responsive, accessible charts.
 
-- `GET /api/v1/interviews/`
-- `POST /api/v1/interviews/`
-- `GET /api/v1/interviews/{id}/`
-- `POST /api/v1/interviews/{id}/start/`
-- `POST /api/v1/interviews/{id}/turns/`
-- `POST /api/v1/interviews/{id}/pause/`
-- `POST /api/v1/interviews/{id}/resume/`
-- `POST /api/v1/interviews/{id}/finish/`
-- `GET /api/v1/interviews/{id}/report/`
+Provide date filters and category filters where useful.
 
-### Speech
+Do not treat a higher speaking rate as automatically better. Show target ranges only when supported by a suitable assessment rubric.
 
-- `POST /api/v1/speech/transcribe/`
-- `POST /api/v1/speech/synthesize/`
-- `POST /api/v1/speech/analyze/`
+Do not compare accents or voice characteristics as indicators of personal worth or professionalism.
 
-### Learning issues
+## 15. Interview History
 
-- `GET /api/v1/communication/issues/`
-- `GET /api/v1/communication/issues/{id}/`
-- `PATCH /api/v1/communication/issues/{id}/`
-- `POST /api/v1/communication/issues/{id}/dismiss/`
-- `POST /api/v1/communication/issues/{id}/confirm/`
+Build a searchable, filterable interview history page.
 
-### English practice
+Include:
 
-- `GET /api/v1/practice/queue/`
-- `POST /api/v1/practice/attempts/`
-- `GET /api/v1/practice/history/`
-- `POST /api/v1/practice/issues/{id}/master/`
-- `GET /api/v1/practice/progress/`
-
-### Knowledge base
-
-- `GET /api/v1/knowledge/sources/`
-- `POST /api/v1/knowledge/sources/import/`
-- `GET /api/v1/knowledge/search/`
-
-### Dashboard
-
-- `GET /api/v1/reports/overview/`
-- `GET /api/v1/reports/communication/`
-- `GET /api/v1/reports/interviews/`
-
-Adapt these endpoints when a more consistent REST design is appropriate. Use pagination, validation, suitable HTTP status codes, and a consistent error-response structure.
-
-## 16. Database Design
-
-Create appropriate Django models and migrations for:
-
-- User.
+- Interview title.
 - Role.
-- Topic.
-- Question.
-- KnowledgeSource.
-- DocumentChunk.
-- InterviewSession.
-- InterviewTurn.
-- InterviewEvaluation.
-- CommunicationIssue.
-- PracticeAttempt.
-- ProgressSnapshot or equivalent aggregated progress records.
+- Interview type.
+- Date.
+- Duration.
+- Completion status.
+- Available report indicator.
 
-Use foreign keys, indexes, uniqueness constraints, and timestamps appropriately.
+Support:
 
-Avoid storing duplicate data unnecessarily. Preserve immutable snapshots of interview questions and original transcripts where required for historical accuracy.
+- View transcript.
+- View report.
+- Review associated communication issues.
+- Delete an interview when supported by the backend.
 
-## 17. Privacy and Security
+Ask for confirmation before destructive actions and accurately reflect backend success or failure.
 
-- Keep all processing local by default.
-- Use environment variables for secrets and configurable service addresses.
-- Restrict access to private resources by user.
-- Validate uploaded audio files and apply configurable upload limits.
-- Prevent path traversal and unsafe file access.
-- Avoid logging raw transcripts, credentials, or full audio content unnecessarily.
-- Provide a way to delete interviews, learning records, and associated audio.
-- Delete temporary audio files after processing when retention is unnecessary.
-- Configure local services to bind to localhost by default.
-- Do not expose Django debug mode or development servers to public networks.
-- Include CSRF protection, suitable authentication controls, and secure file handling.
-- Document any dependency that may make a network request.
+## 16. Knowledge Sources
 
-## 18. Testing Requirements
+Create a knowledge-source management page for locally imported documentation.
 
-Write automated tests for:
+Display:
 
-- Registration, login, and permissions.
-- Interview creation and state transitions.
-- Saving turns and preserving original transcripts.
-- Ensuring interview corrections are never spoken or shown mid-interview.
-- Creating and reviewing communication issues.
-- Correctly separating transcription uncertainty from confirmed learning issues.
-- Practice attempts and progress tracking.
-- User data isolation.
-- File validation and cleanup.
-- Ollama-unavailable behavior.
-- RAG retrieval and source attribution.
-- API validation and error handling.
+- Source title.
+- Source URL.
+- License or permission metadata.
+- Import status.
+- Verification status.
+- Import date.
+- Available actions.
 
-Mock the LLM, speech models, and TTS engine in ordinary unit tests so the test suite does not require downloading large models or running Ollama.
+Allow users to search the knowledge base and inspect source details.
 
-Provide optional integration tests for real local models.
+Only expose import actions that are supported by the backend. Explain that sources are used to ground technical interview questions and feedback.
 
-## 19. Development Phases
+Never display fabricated source citations.
 
-Implement in this order:
+## 17. Settings and Privacy
 
-Phase 1: Project setup, configuration, authentication, database models, and migrations.
+Create settings for:
 
-Phase 2: Interview session management, questions, turns, and state transitions.
+- Preferred theme.
+- Preferred interview interaction mode.
+- Speech settings supported by the backend.
+- Available local model status.
+- Audio-retention preferences.
+- Local data-management actions.
+- Account settings.
 
-Phase 3: Local Ollama integration and interview orchestration.
+Explain which records and audio files are retained.
 
-Phase 4: Local speech-to-text and text-to-speech integration.
+Allow users to request deletion of their interviews, communication issues, and associated practice records when supported.
 
-Phase 5: Silent communication issue logging and post-interview evaluation.
+Do not transmit audio to external services. Use only the configured local backend.
 
-Phase 6: English Improvement Lab, practice attempts, and progress tracking.
+Clearly distinguish frontend preferences from backend settings.
 
-Phase 7: Local RAG ingestion, retrieval, and source attribution.
+## 18. API Integration Layer
 
-Phase 8: Reports, privacy controls, automated testing, and documentation.
+Implement a centralized, typed API client.
 
-Complete and verify each phase before proceeding. Do not generate a large amount of untested code in one step.
+Create service modules for:
 
-## 20. Required Deliverables
+- Authentication.
+- Interviews.
+- Speech.
+- Communication issues.
+- Practice.
+- Reports.
+- Knowledge sources.
 
-When implementation is complete, provide:
+Use TypeScript interfaces for request and response structures.
 
-1. Working Django backend source code.
-2. Database models and migrations.
-3. REST API endpoints.
-4. Automated tests and their results.
-5. `requirements.txt` with compatible dependency versions.
-6. `.env.example`.
-7. `.gitignore`.
-8. README with Windows setup instructions.
-9. Instructions for installing and configuring Ollama, faster-whisper, FFmpeg, and the chosen local TTS engine.
-10. Commands to create the virtual environment, migrate the database, run tests, and start the server.
-11. API endpoint documentation with example requests and responses.
-12. A clear list of implemented, partially implemented, and deferred features.
+Requirements:
 
-Start by inspecting the existing repository. Then implement Phase 1, run its tests, and report exactly what works before continuing. Do not claim a feature is complete unless it is implemented and verified.
+- Centralize base URL configuration.
+- Handle authentication and CSRF according to the backend setup.
+- Handle timeouts and network errors.
+- Parse backend errors safely.
+- Support multipart audio uploads.
+- Avoid duplicate API requests and accidental double submissions.
+- Use loading, success, empty, and failure states.
+- Do not hardcode production data into the UI.
+- Use mock data only in clearly identified development fixtures.
+
+Do not create fake success states when an API request fails.
+
+## 19. Accessibility and User Experience
+
+Implement:
+
+- Keyboard navigation.
+- Visible focus states.
+- Semantic HTML.
+- Accessible labels for microphone and audio controls.
+- Screen-reader-friendly recording status.
+- Sufficient text contrast.
+- Responsive forms and tables.
+- Clear validation messages.
+- Reduced-motion support.
+- Helpful empty states.
+
+Make audio playback, recording, and interview controls usable without relying on color alone.
+
+## 20. Performance and Maintainability
+
+- Use Server Components by default where appropriate.
+- Use Client Components only when browser interaction or state requires them.
+- Keep components small and reusable.
+- Separate API services, types, hooks, and UI components.
+- Avoid putting all logic in a single page.
+- Lazy-load heavier charts and optional modules where beneficial.
+- Avoid unnecessary client-side dependencies.
+- Do not load AI models into the browser; AI inference belongs in the local Django services.
+- Avoid storing transcripts or audio in localStorage.
+- Ensure the application remains usable on a modest computer.
+
+## 21. Suggested Frontend Structure
+
+frontend/
+  app/
+    (auth)/
+      login/
+      register/
+    (dashboard)/
+      dashboard/
+      interviews/
+      history/
+      english-lab/
+      pronunciation/
+      communication-progress/
+      knowledge/
+      settings/
+    interview/
+      [id]/
+    layout.tsx
+    page.tsx
+  components/
+    layout/
+    dashboard/
+    interview/
+    audio/
+    communication/
+    practice/
+    charts/
+    forms/
+    ui/
+  lib/
+    api/
+    auth/
+    validation/
+    utils/
+  hooks/
+  types/
+  public/
+  tests/
+  .env.example
+  README.md
+
+Adapt the structure to the current project. Do not duplicate existing files or components.
+
+## 22. Testing Requirements
+
+Add tests for:
+
+- Form validation.
+- API client behavior.
+- Authentication and protected routes.
+- Loading, empty, and error states.
+- Interview state transitions.
+- Audio recording controls and permission failures.
+- Preventing duplicate answer submissions.
+- Learning-issue filters.
+- Practice-attempt submission.
+- Chart rendering with empty and populated data.
+- Mobile navigation.
+- Accessibility of critical controls.
+
+Mock backend responses in frontend tests. Do not require real speech models or Ollama to run the normal frontend test suite.
+
+## 23. Implementation Phases
+
+Phase 1: Project setup, design system, responsive layout, authentication pages.
+
+Phase 2: Dashboard, interview setup, and interview history.
+
+Phase 3: Live interview UI, microphone recording, audio playback, and text fallback.
+
+Phase 4: Interview reports and transcript review.
+
+Phase 5: English Improvement Lab and issue-review workflows.
+
+Phase 6: Pronunciation and grammar practice.
+
+Phase 7: Communication progress charts and reports.
+
+Phase 8: Knowledge-source management, settings, privacy, accessibility, and testing.
+
+Implement each phase incrementally. Run linting, type checking, and tests before moving to the next phase.
+
+## 24. Required Deliverables
+
+Provide:
+
+1. Complete working Next.js frontend source.
+2. Responsive pages and reusable components.
+3. Typed Django API integration.
+4. Audio-recording and playback functionality.
+5. Interview and English-practice workflows.
+6. Environment-variable example.
+7. Automated tests.
+8. Setup and run instructions for Windows.
+9. Documentation identifying backend endpoints that still need implementation.
+10. A summary of completed, partially completed, and deferred functionality.
+
+Start by inspecting the repository and creating an implementation plan. Then build the application incrementally, verifying each phase. Do not claim that a workflow works until it has been tested against the relevant backend endpoint.
